@@ -51,4 +51,4 @@ def _process_one(cfg, output_dir, dry_run=False, history_dir=None):
     qa = run_qa(results, history)
     if qa.has_errors():
         logger.error("  [" + cfg.survey_id + "] QA errors detected")
-    return export_results(results, qa, output_dir, cfg.survey_id)
+    return export_results(results, qa, output_dir, cfg.survey_id, cfg=cfg)

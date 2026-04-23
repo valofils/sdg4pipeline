@@ -11,13 +11,20 @@ plt.rcParams.update({"figure.dpi": 150, "savefig.bbox": "tight"})
 LEVEL_ORDER = ["primary", "lower_secondary", "upper_secondary"]
 
 
-def export_results(results, qa_report, output_dir, survey_id, make_figures=True):
+def export_results(results, qa_report, output_dir, survey_id, make_figures=True, cfg=None):
     d = Path(output_dir) / survey_id
     d.mkdir(parents=True, exist_ok=True)
     (d / "figures").mkdir(exist_ok=True)
     results.to_csv(d / "indicators.csv", index=False)
     _write_excel(results, d / "indicators_wide.xlsx")
     qa_report.flags.to_csv(d / "qa_flags.csv", index=False)
+    # Generate methodological note
+    if cfg is not None:
+        from gem_pipeline.docs.methodological_notes import generate_note
+        note = generate_note(cfg, results, qa_report)
+        (d / "methodological_note.md").write_text(note)
+        logger.debug("Written: methodological_note.md")
+
     if make_figures and not results.empty:
         _plot_oosr(results, d / "figures")
         _plot_completion(results, d / "figures")

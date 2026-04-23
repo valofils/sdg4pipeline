@@ -70,5 +70,29 @@ def cmd_inventory(
     rprint(t)
 
 
+
+
+@app.command("notes")
+def cmd_notes(
+    control: Path = typer.Option("config/control_file.csv", "--control", "-c"),
+    output: Path = typer.Option("data/outputs", "--output", "-o"),
+    countries: Optional[list[str]] = typer.Option(None, "--countries"),
+):
+    """Generate methodological notes for processed surveys."""
+    configs = load_control_file(control)
+    if countries:
+        configs = filter_configs(configs, countries=list(countries))
+    if not configs:
+        rprint("[red]No matching configs.[/red]")
+        raise typer.Exit(1)
+    for cfg in configs:
+        note_path = Path(str(output)) / cfg.survey_id / "methodological_note.md"
+        if note_path.exists():
+            rprint("[green]Exists:[/green] " + str(note_path))
+        else:
+            rprint("[yellow]Not found:[/yellow] " + str(note_path) +
+                   " — run gem-pipeline run first")
+
+
 if __name__ == "__main__":
     app()
