@@ -218,3 +218,20 @@ def _merge_wealth_quintile(df: pd.DataFrame, hhold_path: Path) -> pd.DataFrame:
         + str(n_matched) + "/" + str(len(df)) + " persons matched"
     )
     return df
+
+
+def preprocess_mics(df, survey_year: int = 2021) -> "pd.DataFrame":
+    """
+    MICS-specific pre-processing stub.
+
+    MICS surveys require merging the household (hh) and child (hl) modules.
+    This stub raises NotImplementedError until the MICS preprocessor is
+    implemented. See: docs/adding_a_new_survey.md
+
+    Expected canonical columns to produce (matching control file var names):
+      ATTEND_RECODE, GRADE_RECODE, URBAN_RECODE, WEALTH_Q
+    """
+    raise NotImplementedError(
+        "MICS preprocessor not yet implemented. "
+        "See scripts/mics_preprocessor_template.py for guidance."
+    )
