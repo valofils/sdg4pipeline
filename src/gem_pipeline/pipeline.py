@@ -38,7 +38,17 @@ def _process_one(cfg, output_dir, dry_run=False, history_dir=None):
     df, _ = load_survey(cfg.file_path, cfg.file_format)
     if 'GHS' in cfg.survey_name.upper():
         from gem_pipeline.ingestion.preprocessors import preprocess_ghs
-        df = preprocess_ghs(df, survey_year=cfg.survey_year)
+        from pathlib import Path as _Path
+        _p = _Path(str(cfg.file_path))
+        _hhold_candidates = [
+            _p.parent / _p.name.replace('person', 'hhold'),
+            _p.parent / 'ghs-2022-hhold-v1.dta',
+            _p.parent / 'ghs-2022-hhold-v1.csv',
+        ]
+        _hhold_path = next((h for h in _hhold_candidates if h.exists()), None)
+        if _hhold_path:
+            logger.info('GHS: using household file ' + _hhold_path.name)
+        df = preprocess_ghs(df, survey_year=cfg.survey_year, hhold_path=_hhold_path)
         df.columns = [c.lower() for c in df.columns]
     df_h = harmonize(df, cfg)
     results = compute_all_indicators(df_h, cfg)

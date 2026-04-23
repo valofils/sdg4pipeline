@@ -44,10 +44,22 @@ def load_survey(path, file_format, columns=None, encoding="utf-8"):
 def _load_stata(path, columns=None, **_):
     if not _PYREADSTAT:
         raise ImportError("pip install pyreadstat")
-    df, m = pyreadstat.read_dta(str(path), usecols=columns, apply_value_formats=False)
-    meta = SurveyMeta(path, "dta", len(df), len(df.columns),
-                      dict(zip(m.column_names, m.column_labels)), m.value_labels)
-    return df, meta
+    # Try utf-8 first, fall back to latin1 (needed for Stats SA GHS files)
+    for enc in [None, "latin1", "cp1252"]:
+        try:
+            kwargs = {"usecols": columns, "apply_value_formats": False}
+            if enc:
+                kwargs["encoding"] = enc
+            df, m = pyreadstat.read_dta(str(path), **kwargs)
+            if enc:
+                logger.debug("Loaded DTA with encoding=" + enc)
+            meta = SurveyMeta(path, "dta", len(df), len(df.columns),
+                              dict(zip(m.column_names, m.column_labels)), m.value_labels)
+            return df, meta
+        except UnicodeDecodeError:
+            continue
+    raise UnicodeDecodeError("utf-8", b"", 0, 1,
+        "Could not decode DTA file with utf-8, latin1, or cp1252")
 
 
 def _load_spss(path, columns=None, **_):
