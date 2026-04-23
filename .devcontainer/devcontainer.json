@@ -1,0 +1,12 @@
+{
+  "name": "GEM SDG4 Pipeline",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "postCreateCommand": "pip install -e '.[dev]'",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python","ms-python.black-formatter","eamodio.gitlens"],
+      "settings": {"editor.formatOnSave": true}
+    }
+  },
+  "remoteEnv": {"PYTHONPATH": "${containerWorkspaceFolder}/src"}
+}
