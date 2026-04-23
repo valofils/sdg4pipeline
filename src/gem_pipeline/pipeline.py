@@ -36,6 +36,10 @@ def _process_one(cfg, output_dir, dry_run=False, history_dir=None):
         logger.info("  [DRY RUN] " + cfg.survey_id + ": " + str(cfg.indicators))
         return output_dir / cfg.survey_id
     df, _ = load_survey(cfg.file_path, cfg.file_format)
+    if 'GHS' in cfg.survey_name.upper():
+        from gem_pipeline.ingestion.preprocessors import preprocess_ghs
+        df = preprocess_ghs(df, survey_year=cfg.survey_year)
+        df.columns = [c.lower() for c in df.columns]
     df_h = harmonize(df, cfg)
     results = compute_all_indicators(df_h, cfg)
     logger.info("  [" + cfg.survey_id + "] " + str(len(results)) + " estimates computed")

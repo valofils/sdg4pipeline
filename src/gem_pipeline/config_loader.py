@@ -39,7 +39,7 @@ class CountryConfig(BaseModel):
     age_upper_secondary_min: int = 15
     age_upper_secondary_max: int = 17
     indicators: list[str] = Field(default_factory=list)
-    notes: str = ""
+    notes: str | None = ""
 
     @field_validator("country_iso3")
     @classmethod
