@@ -39,7 +39,12 @@ class CountryConfig(BaseModel):
     age_upper_secondary_min: int = 15
     age_upper_secondary_max: int = 17
     indicators: list[str] = Field(default_factory=list)
-    notes: str | None = ""
+    notes: str = ""
+
+    @field_validator("notes", mode="before")
+    @classmethod
+    def coerce_notes(cls, v):
+        return "" if v is None else str(v)
 
     @field_validator("country_iso3")
     @classmethod
