@@ -94,5 +94,42 @@ def cmd_notes(
                    " — run gem-pipeline run first")
 
 
+
+
+@app.command("export")
+def cmd_export(
+    control: Path = typer.Option("config/control_file.csv", "--control", "-c"),
+    output: Path = typer.Option("data/outputs", "--output", "-o"),
+    countries: Optional[list[str]] = typer.Option(None, "--countries"),
+    fmt: str = typer.Option("both", "--format", "-f",
+                            help="Output format: wide, scope, or both"),
+):
+    """Export WIDE and/or SCOPE formatted CSVs from existing results."""
+    from gem_pipeline.output.wide_scope_formatter import to_wide, to_scope, to_both
+    configs = load_control_file(control)
+    if countries:
+        configs = filter_configs(configs, countries=list(countries))
+    if not configs:
+        rprint("[red]No matching configs.[/red]")
+        raise typer.Exit(1)
+    import pandas as pd
+    for cfg in configs:
+        results_path = Path(str(output)) / cfg.survey_id / "indicators.csv"
+        if not results_path.exists():
+            rprint("[yellow]Not found:[/yellow] " + str(results_path) + " — run gem-pipeline run first")
+            continue
+        results = pd.read_csv(results_path)
+        out_dir = Path(str(output)) / cfg.survey_id
+        if fmt == "wide":
+            to_wide(results, cfg, out_dir / "wide_export.csv")
+            rprint("[green]Exported WIDE:[/green] " + str(out_dir / "wide_export.csv"))
+        elif fmt == "scope":
+            to_scope(results, cfg, out_dir / "scope_export.csv")
+            rprint("[green]Exported SCOPE:[/green] " + str(out_dir / "scope_export.csv"))
+        else:
+            to_both(results, cfg, out_dir)
+            rprint("[green]Exported WIDE + SCOPE:[/green] " + str(out_dir))
+
+
 if __name__ == "__main__":
     app()

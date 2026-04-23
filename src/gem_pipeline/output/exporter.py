@@ -18,6 +18,12 @@ def export_results(results, qa_report, output_dir, survey_id, make_figures=True,
     results.to_csv(d / "indicators.csv", index=False)
     _write_excel(results, d / "indicators_wide.xlsx")
     qa_report.flags.to_csv(d / "qa_flags.csv", index=False)
+    # Generate WIDE and SCOPE exports
+    if cfg is not None and not results.empty:
+        from gem_pipeline.output.wide_scope_formatter import to_both
+        to_both(results, cfg, d)
+        logger.debug("Written: wide_export.csv + scope_export.csv")
+
     # Generate methodological note
     if cfg is not None:
         from gem_pipeline.docs.methodological_notes import generate_note
